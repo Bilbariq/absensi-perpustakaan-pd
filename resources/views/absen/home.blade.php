@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('absen.layout')
 
 @section('content')
     <h1>Selamat Datang Pegawai Parmadenda!</h1>

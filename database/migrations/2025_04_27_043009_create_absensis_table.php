@@ -4,28 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateAbsensisTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         Schema::create('absensis', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->time('jam_masuk');
-            $table->string('status'); // "Tepat Waktu" atau "Telat"
+            $table->string('jam_masuk');
+            $table->string('status');
+            $table->date('tanggal');
+            $table->string('bulan');
             $table->timestamps();
         });
     }
-    
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('absensis');
     }
-};
+}

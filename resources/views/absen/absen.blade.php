@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('absen.layout')
 
 @section('content')
     <h1>Form Absensi</h1>
