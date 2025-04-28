@@ -10,7 +10,7 @@
     <div class="container">
         <div class="sidebar">
             <div class="logo">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo Parmadenda">
+                <img src="{{ asset('images/logoparma.jpeg') }}" alt="Logo Parmadenda">
             </div>
             <nav class="nav-links">
                 <a href="{{ route('home') }}">Home</a>
