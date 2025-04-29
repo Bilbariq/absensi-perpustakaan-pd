@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use App\Models\Absensi;
 use Illuminate\Pagination\LengthAwarePaginator;
-
 
 class AbsenController extends Controller
 {
@@ -21,55 +20,53 @@ class AbsenController extends Controller
 
     public function store(Request $request)
     {
-        $data = Session::get('absen_data', []);
-    
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'jam_masuk' => 'required',
+        ]);
+
         $jamMasuk = $request->jam_masuk;
-        $tanggal = date('d'); // Ambil tanggal hari ini
-        $bulan = date('F');   // Ambil nama bulan, misal: April
-    
-        $telat = strtotime($jamMasuk) > strtotime('08:00') ? true : false;
-    
-        $data[] = [
+        $tanggal = date('Y-m-d'); // format tanggal database
+        $bulan = date('F');        // nama bulan (April, Mei, dst)
+
+        $status = strtotime($jamMasuk) > strtotime('08:00') ? 'telat' : 'tepat';
+
+        // Simpan ke database
+        Absensi::create([
             'nama' => $request->nama,
             'jam_masuk' => $jamMasuk,
+            'status' => $status,
             'tanggal' => $tanggal,
             'bulan' => $bulan,
-            'telat' => $telat,
-        ];
-    
-        Session::put('absen_data', $data);
-    
+        ]);
+
         return redirect()->route('home');
     }
-    
 
     public function rekap(Request $request)
     {
-        $data = Session::get('absen_data', []);
-    
-        $selectedMonth = $request->input('bulan', date('F')); // default bulan sekarang
-    
-        $filtered = array_filter($data, function ($absen) use ($selectedMonth) {
-            return isset($absen['bulan']) && $absen['bulan'] === $selectedMonth;
-        });
-        
-    
+        $selectedMonth = $request->input('bulan', date('F'));
+
+        // Ambil data dari database
+        $data = Absensi::where('bulan', $selectedMonth)->get();
+
         $rekap = [];
-    
-        foreach ($filtered as $absen) {
-            $nama = $absen['nama'];
-    
+
+        foreach ($data as $absen) {
+            $nama = $absen->nama;
+
             if (!isset($rekap[$nama])) {
                 $rekap[$nama] = ['tepat' => 0, 'telat' => 0];
             }
-    
-            if ($absen['telat']) {
+
+            if ($absen->status == 'telat') {
                 $rekap[$nama]['telat']++;
             } else {
                 $rekap[$nama]['tepat']++;
             }
         }
-    
+
         // Bikin pagination manual
         $page = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 5;
@@ -80,7 +77,7 @@ class AbsenController extends Controller
             $page,
             ['path' => request()->url(), 'query' => request()->query()]
         );
-    
+
         return view('absen.rekap', compact('rekapPaginated', 'selectedMonth'));
     }
 }
